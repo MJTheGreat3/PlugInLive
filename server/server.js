@@ -5,8 +5,117 @@ const fs = require('fs');
 const cors = require('cors');
 const { Pool } = require('pg');
 const ffmpeg = require('fluent-ffmpeg');
+const {google} = require('googleapis');
+const fs = require('fs');
 
-// PostgreSQL configuration
+//^ Section 1 : Drive Handling
+
+const auth = new google.auth.GoogleAuth({
+  keyFile: 'path/to/service-account-key.json',
+  scopes: ['https://www.googleapis.com/auth/drive'],
+});
+
+/*
+* @usage 
+    uploadFile({ 
+        src: './path/to/video.mp4', 
+        name: 'UploadedVideo.mp4' 
+    });
+*/
+async function uploadFile({src, name}) {
+  try {
+    const authClient = await auth.getClient();
+    const driveClient = google.drive({ version: 'v3', auth: authClient });
+
+    const fileMetadata = {
+        name: name, // File name in Google Drive
+        parents: ['YOUR_FOLDER_ID'], // Parent folder in Drive
+    };
+
+    const media = {
+        mimeType: 'video/mp4', // encoding type
+        body: fs.createReadStream(src), // file src
+    };
+
+    const response = await driveClient.files.create({
+        requestBody: fileMetadata,
+        media: media,
+        fields: 'id',
+    });
+
+    console.log('Uploaded file ID:', response.data.id);
+  } catch (e) {
+    console.error('Error uploading file:', error.message);
+  }
+}
+
+//^ Section 2: Assembly AI handling
+
+require('dotenv').config();
+const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
+/* 
+* @usage
+    const fileUploadResponse = await uploadFileToAssemblyAI(filePath);
+*/ 
+// Upload file to AssemblyAI
+async function uploadFileToAssemblyAI(filePath) {
+  const file = fs.readFileSync(filePath);
+
+  const response = await axios.post(
+    'https://api.assemblyai.com/v2/upload',
+    file,
+    {
+      headers: {
+        authorization: ASSEMBLYAI_API_KEY,
+        'content-type': 'application/octet-stream',
+      },
+    }
+  );
+
+  return response.data;
+}
+
+/*
+* @usage
+    const transcriptionResponse = await requestTranscription(fileUploadResponse.upload_url);
+
+*/
+// Helper: Request transcription
+async function requestTranscription(uploadUrl) {
+  const response = await axios.post(
+    'https://api.assemblyai.com/v2/transcript',
+    {
+      audio_url: uploadUrl,
+    },
+    {
+      headers: {
+        authorization: ASSEMBLYAI_API_KEY,
+        'content-type': 'application/json',
+      },
+    }
+  );
+
+  return response.data;
+}
+
+// Get transcription status and result
+async function getTranscription({transcriptionId}) {
+  try {
+    const response = await axios.get(
+      `https://api.assemblyai.com/v2/transcript/${transcriptionId}`,
+      {
+        headers: { authorization: ASSEMBLYAI_API_KEY },
+      }
+    );
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ error: 'An error occurred while fetching the transcription.' });
+  }
+
+  return response.data;
+};
+
+//^ Section 3: PostgreSQL configuration
 const pool = new Pool({
     user: 'mj',
     host: 'localhost',
