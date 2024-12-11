@@ -1,5 +1,4 @@
 // src/components/VideoRecorder.jsx
-import React from 'react';
 import { ReactMediaRecorder } from 'react-media-recorder';
 
 const VideoRecorder = () => {

@@ -1,43 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom"
+import { useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
-
-const VideoPreview = ({ stream }) => {
-  const videoRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 500, height: 500 });
-
-useEffect(() => {
-  if (videoRef.current && stream) {
-    videoRef.current.srcObject = stream;
-
-    // Adjust dimensions to match video resolution
-    const videoTrack = stream.getVideoTracks()[0];
-    if (videoTrack) {
-      const { width, height } = videoTrack.getSettings();
-      setDimensions({
-        width: width || 500,
-        height: height || 500,
-      });
-    }
-  }
-}, [stream]);
-
-if (!stream) {
-  return null;
-}
-
-return (
-  <video
-    ref={videoRef}
-    width={dimensions.width}
-    height={dimensions.height}
-    style={{ objectFit: "cover" }}
-    autoPlay
-    controls
-  />
-);
-};
+import VideoPreview from "./VideoPreview.jsx";
 
 const questions = [
   "Tell us about yourself?",
@@ -72,12 +36,12 @@ function Dashboard() {
   const handleSubmit = async () => {
     // Check if all questions have responses
     const allAnswered = recordings.every((recording) => recording !== null);
-  
+
     if (!allAnswered) {
       alert("Please save a response for all questions before submitting.");
       return;
     }
-  
+
     try {
       for (let i = 0; i < recordings.length; i++) {
         if (recordings[i]) {
@@ -85,12 +49,12 @@ function Dashboard() {
           formData.append("userId", "1"); // Default user ID
           formData.append("question", questions[i]);
           formData.append("video", recordings[i]); // video file
-  
+
           // Send individual request for each video
           const response = await axios.post("http://localhost:3000/upload", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
-  
+
           console.log("Response for question", i + 1, ":", response.data);
         }
       }
@@ -100,45 +64,51 @@ function Dashboard() {
       alert("Failed to save responses. Please try again.");
     }
   };
-  
-  
+
+
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Video Interview</h1>
+    <div className="p-5 m-auto max-w-3xl">
+      <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
       {questions.map((question, index) => (
-        <div key={index} style={{ marginBottom: "30px" }}>
-          <h3>{question}</h3>
+        <div key={index} className="mb-6">
+          <h3 className="text-2xl font-semibold mb-4">{question}</h3>
           <ReactMediaRecorder
             video
             render={({ status, startRecording, stopRecording, mediaBlobUrl, previewStream }) => (
-              <div>
-                <div>
-                  <p>Status: {status}</p>
-                </div>
-                <div>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500">Status: {status}</p>
+                <div className="flex justify-center">
                   <VideoPreview stream={previewStream} />
                 </div>
-                <div>
-                  <button onClick={startRecording} style={{ marginRight: "10px" }}>
+                <div className="flex justify-start space-x-4">
+                  <button
+                    onClick={startRecording}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
                     Start Recording
                   </button>
-                  <button onClick={stopRecording}>Stop Recording</button>
+                  <button
+                    onClick={stopRecording}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                  >
+                    Stop Recording
+                  </button>
                 </div>
                 {mediaBlobUrl && (
-                  <div>
+                  <div className="mt-4">
                     <video
                       src={mediaBlobUrl}
                       controls
                       width={dimensions[index]?.width}
                       height={dimensions[index]?.height}
-                      style={{ marginTop: "10px", display: "block" }}
+                      className="mx-auto"
                     />
                     <button
                       onClick={() =>
                         handleSaveRecording(index, mediaBlobUrl, dimensions[index])
                       }
-                      style={{ marginTop: "10px" }}
+                      className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
                       Save Recording
                     </button>
@@ -149,9 +119,13 @@ function Dashboard() {
           />
         </div>
       ))}
-      <button onClick={handleSubmit}>Submit</button>
+      <button
+        onClick={handleSubmit}
+        className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 mt-6"
+      >
+        Submit
+      </button>
     </div>
   );
 }
-
 export default Dashboard;
