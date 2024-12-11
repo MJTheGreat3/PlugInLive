@@ -271,9 +271,11 @@ async function getNextSerialNumber() {
 }
 
 // Upload JSON file to Google Drive
-async function uploadJsonFile(localFilePath, fileName) {
+async function uploadJsonFile(localFilePath, fileName, folderId) {
+    console.log(folderId);
     const fileMetadata = {
         name: fileName, // Name of the file in Google Drive
+        parents: [folderId],
         mimeType: "application/json",
     };
 
@@ -365,7 +367,9 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       const jsonFilePath = mp4FilePath.replace(".mp4", ".json");
       fs.writeFileSync(jsonFilePath, JSON.stringify(transcriptionResult, null, 2));
       const JSONFileName = `${userId}_${questionCode}_${serialNo}.json`;
-      await uploadJsonFile(jsonFilePath, JSONFileName); // todo : please put in the drive-link and name
+      console.log("Here?");
+      await uploadJsonFile(jsonFilePath, JSONFileName, userFolderId); // todo : please put in the drive-link and name
+      console.log("No, here");
 
       res.status(200).send({
           message: "Video uploaded and transcribed successfully!",
@@ -383,6 +387,9 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       });
       fs.unlink(mp4FilePath, (err) => {
         if (err) console.error("Error deleting MP4 file:", err);
+      });
+      fs.unlink(jsonFilePath, (err) => {
+        if (err) console.error("Error deleting JSON file:", err);
       });
       console.log("2");
 
