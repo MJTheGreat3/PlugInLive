@@ -69,55 +69,70 @@ function App() {
   };
 
   const handleSubmit = async () => {
-    const formData = new FormData();
-    formData.append("userId", "1"); // Default user ID
-    questions.forEach((question, index) => {
-      formData.append(`videos[${index}][question]`, question);
-      formData.append(`videos[${index}][video]`, recordings[index]);
-    });
-
     try {
-      const response = await axios.post("http://localhost:3000/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      for (let i = 0; i < recordings.length; i++) {
+        if (recordings[i]) {
+          const formData = new FormData();
+          formData.append("userId", "1"); // Default user ID
+          formData.append("question", questions[i]);
+          formData.append("video", recordings[i]); // video file
+  
+          // Send individual request for each video
+          const response = await axios.post("http://localhost:3000/upload", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+  
+          console.log("Response for question", i + 1, ":", response.data);
+        }
+      }
       alert("Responses saved successfully!");
     } catch (error) {
       console.error("Error submitting responses:", error);
       alert("Failed to save responses. Please try again.");
     }
   };
+  
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Video Interview</h1>
       {questions.map((question, index) => (
-        <div key={index} style={{ marginBottom: "20px" }}>
+        <div key={index} style={{ marginBottom: "30px" }}>
           <h3>{question}</h3>
           <ReactMediaRecorder
             video
             render={({ status, startRecording, stopRecording, mediaBlobUrl, previewStream }) => (
               <div>
-                <p>Status: {status}</p>
-                <VideoPreview stream={previewStream} />
-                <button onClick={startRecording}>Start Recording</button>
-                <button onClick={stopRecording}>Stop Recording</button>
+                <div>
+                  <p>Status: {status}</p>
+                </div>
+                <div>
+                  <VideoPreview stream={previewStream} />
+                </div>
+                <div>
+                  <button onClick={startRecording} style={{ marginRight: "10px" }}>
+                    Start Recording
+                  </button>
+                  <button onClick={stopRecording}>Stop Recording</button>
+                </div>
                 {mediaBlobUrl && (
-                  <>
+                  <div>
                     <video
                       src={mediaBlobUrl}
                       controls
                       width={dimensions[index]?.width}
                       height={dimensions[index]?.height}
-                      style={{ objectFit: "cover", marginTop: "10px" }}
+                      style={{ marginTop: "10px", display: "block" }}
                     />
                     <button
                       onClick={() =>
                         handleSaveRecording(index, mediaBlobUrl, dimensions[index])
                       }
+                      style={{ marginTop: "10px" }}
                     >
                       Save Recording
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             )}
