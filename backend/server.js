@@ -297,6 +297,45 @@ async function uploadJsonFile(localFilePath, fileName, folderId) {
   }
 }
 
+
+const language = "en"; // Language code for English
+
+async function checkSyntaxAndGrammar(text) {
+  try {
+    const response = await axios.post(
+      "https://api.languagetoolplus.com/v2/check",
+      new URLSearchParams({
+        text: text,
+        language: language,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    // Filter matches to exclude spelling-related issues
+    const matches = response.data.matches.filter((match) =>
+      match.rule.category.id !== "TYPOS" // Exclude typos/spelling issues
+    );
+
+    console.log("Grammar/Syntax Issues Found:", matches.length);
+
+    matches.forEach((match, index) => {
+      console.log(`Issue ${index + 1}:`);
+      console.log(`- Message: ${match.message}`);
+      console.log(`- Suggestion: ${match.replacements.map((r) => r.value).join(", ")}`);
+      console.log(`- Context: ${match.context.text}`);
+    });
+
+    return matches.length; // Return the count of grammar/syntax issues
+  } catch (error) {
+    console.error("Error checking grammar/syntax:", error);
+  }
+}
+
+
 // API Route to handle video uploads and transcriptions
 app.post("/upload", upload.single("video"), async (req, res) => {
   const { userId, question } = req.body;
