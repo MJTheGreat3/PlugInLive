@@ -73,12 +73,6 @@ async function getTranscription({ transcriptionId }) {
 };
 
 //^ Section 3: PostgreSQL configuration
-const pool = new Pool({
-  user: 'mj',
-  host: 'localhost',
-  database: 'video_store',
-  port: 5432,
-});
 
 const app = express();
 app.use(cors({
