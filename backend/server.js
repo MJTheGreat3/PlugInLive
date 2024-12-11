@@ -1,11 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const cors = require('cors');
 const { Pool } = require('pg');
 const ffmpeg = require('fluent-ffmpeg');
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 const fs = require('fs');
 
 //^ Section 1 : Drive Handling
@@ -22,25 +21,25 @@ const auth = new google.auth.GoogleAuth({
         name: 'UploadedVideo.mp4' 
     });
 */
-async function uploadFile({src, name}) {
+async function uploadFile({ src, name }) {
   try {
     const authClient = await auth.getClient();
     const driveClient = google.drive({ version: 'v3', auth: authClient });
 
     const fileMetadata = {
-        name: name, // File name in Google Drive
-        parents: ['YOUR_FOLDER_ID'], // Parent folder in Drive
+      name: name, // File name in Google Drive
+      parents: ['YOUR_FOLDER_ID'], // Parent folder in Drive
     };
 
     const media = {
-        mimeType: 'video/mp4', // encoding type
-        body: fs.createReadStream(src), // file src
+      mimeType: 'video/mp4', // encoding type
+      body: fs.createReadStream(src), // file src
     };
 
     const response = await driveClient.files.create({
-        requestBody: fileMetadata,
-        media: media,
-        fields: 'id',
+      requestBody: fileMetadata,
+      media: media,
+      fields: 'id',
     });
 
     console.log('Uploaded file ID:', response.data.id);
@@ -56,7 +55,7 @@ const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
 /* 
 * @usage
     const fileUploadResponse = await uploadFileToAssemblyAI(filePath);
-*/ 
+*/
 // Upload file to AssemblyAI
 async function uploadFileToAssemblyAI(filePath) {
   const file = fs.readFileSync(filePath);
@@ -99,7 +98,7 @@ async function requestTranscription(uploadUrl) {
 }
 
 // Get transcription status and result
-async function getTranscription({transcriptionId}) {
+async function getTranscription({ transcriptionId }) {
   try {
     const response = await axios.get(
       `https://api.assemblyai.com/v2/transcript/${transcriptionId}`,
@@ -117,16 +116,16 @@ async function getTranscription({transcriptionId}) {
 
 //^ Section 3: PostgreSQL configuration
 const pool = new Pool({
-    user: 'mj',
-    host: 'localhost',
-    database: 'video_store',
-    port: 5432,
+  user: 'mj',
+  host: 'localhost',
+  database: 'video_store',
+  port: 5432,
 });
 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173', // Allow only your frontend
-    methods: ['GET', 'POST'],        // Allow only GET and POST
+  origin: 'http://localhost:5173', // Allow only your frontend
+  methods: ['GET', 'POST'],        // Allow only GET and POST
 }));
 
 const port = 3000;
@@ -134,17 +133,17 @@ const port = 3000;
 // Ensure 'uploads' directory exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir);
 }
 
 // Configure Multer for file uploads
 const storage = multer.diskStorage({
-destination: (req, file, cb) => {
+  destination: (req, file, cb) => {
     cb(null, uploadDir);
-},
-filename: (req, file, cb) => {
+  },
+  filename: (req, file, cb) => {
     cb(null, Date.now() + '.webm');
-},
+  },
 });
 const upload = multer({ storage });
 
@@ -153,53 +152,53 @@ app.use(express.json());
 
 // Route to handle video uploads
 app.post('/upload', upload.single('video'), async (req, res) => {
-    const { texts } = req.body;
+  const { texts } = req.body;
 
-    if (!req.file) {
-        return res.status(400).send('No video file uploaded.');
-    }
+  if (!req.file) {
+    return res.status(400).send('No video file uploaded.');
+  }
 
-    try {
-        // Parse texts from JSON string
-        const parsedTexts = JSON.parse(texts);
+  try {
+    // Parse texts from JSON string
+    const parsedTexts = JSON.parse(texts);
 
-        // Save to PostgreSQL
-        const originalVideoPath = req.file.path;
-        const convertedVideoPath = originalVideoPath.replace(path.extname(req.file.filename), '.mp4');
+    // Save to PostgreSQL
+    const originalVideoPath = req.file.path;
+    const convertedVideoPath = originalVideoPath.replace(path.extname(req.file.filename), '.mp4');
 
-        ffmpeg(originalVideoPath)
-            .output(convertedVideoPath)
-            .on('end', async () => {
-                const query = `
+    ffmpeg(originalVideoPath)
+      .output(convertedVideoPath)
+      .on('end', async () => {
+        const query = `
                 INSERT INTO videos (video_path, texts)
                 VALUES ($1, $2)
                 RETURNING *;
                 `;
-                const values = [convertedVideoPath, parsedTexts];
-                const result = await pool.query(query, values);
+        const values = [convertedVideoPath, parsedTexts];
+        const result = await pool.query(query, values);
 
-                fs.unlink(originalVideoPath, (err) => {
-                    if (err) console.error('Error deleting original file: ', err);
-                });
+        fs.unlink(originalVideoPath, (err) => {
+          if (err) console.error('Error deleting original file: ', err);
+        });
 
-                res.send({
-                    message: 'Video and texts uploaded successfully',
-                    data: result.rows[0],
-                });
-            })
-            .on('error', (err) => {
-                console.error('Error converting video: ', err);
-                res.status(500).send('Failed to convert video to MP4 format.');
-            })
-            .run();
-        
-    } catch (error) {
-        console.error('Error saving to database:', error);
-        res.status(500).send('Failed to save data.');
-    }
+        res.send({
+          message: 'Video and texts uploaded successfully',
+          data: result.rows[0],
+        });
+      })
+      .on('error', (err) => {
+        console.error('Error converting video: ', err);
+        res.status(500).send('Failed to convert video to MP4 format.');
+      })
+      .run();
+
+  } catch (error) {
+    console.error('Error saving to database:', error);
+    res.status(500).send('Failed to save data.');
+  }
 });
 
 // Start the server
 app.listen(port, () => {
-console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });
