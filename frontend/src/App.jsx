@@ -69,6 +69,14 @@ function App() {
   };
 
   const handleSubmit = async () => {
+    // Check if all questions have responses
+    const allAnswered = recordings.every((recording) => recording !== null);
+  
+    if (!allAnswered) {
+      alert("Please save a response for all questions before submitting.");
+      return;
+    }
+  
     try {
       for (let i = 0; i < recordings.length; i++) {
         if (recordings[i]) {
@@ -91,6 +99,7 @@ function App() {
       alert("Failed to save responses. Please try again.");
     }
   };
+  
   
 
   return (

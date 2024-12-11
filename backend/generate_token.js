@@ -5,7 +5,7 @@ const path = require("path");
 
 const SCOPES = ["https://www.googleapis.com/auth/drive.file"];
 const TOKEN_PATH = path.join(__dirname, "credentials.json"); // Where the token will be saved
-const CLIENT_SECRET_PATH = path.join(__dirname, "client_secret_780811699902-co7urandbrpl98v1ve64ntq4cc3uus4u.apps.googleusercontent.com.json"); // Path to your client secret JSON file
+const CLIENT_SECRET_PATH = path.join(__dirname, "client_secret.json"); // Path to your client secret JSON file
 
 // Load client secrets
 fs.readFile(CLIENT_SECRET_PATH, (err, content) => {
