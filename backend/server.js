@@ -115,9 +115,9 @@ const getTranscription = async (req, res) => {
 
 //^ Section 3: PostgreSQL configuration
 const pool = new Pool({
-  user: 'mj',
+  user: 'dheerajmurthy',
   host: 'localhost',
-  database: 'video_store',
+  database: 'postgres',
   port: 5432,
 });
 
