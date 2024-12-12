@@ -7,6 +7,7 @@ const { google } = require("googleapis");
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const axios = require("axios");
+const generateTranscriptionReport = require("./report.js");
 //^ Section 2: Assembly AI handling
 
 require("dotenv").config();
@@ -96,7 +97,7 @@ const getTranscription = async (req, res) => {
     );
 
     // Check if the transcription is complete
-    if (response.data.status !== 'completed') {
+    if (response.data.status !== "completed") {
       console.log("Transcription is not ready yet:", response.data.status);
       return {
         status: response.data.status,
@@ -107,26 +108,29 @@ const getTranscription = async (req, res) => {
     console.log("Transcription completed successfully:");
     return response.data; // Return the transcription result
   } catch (error) {
-    console.error("Error fetching transcription:", error.response?.data || error.message);
+    console.error(
+      "Error fetching transcription:",
+      error.response?.data || error.message
+    );
     return res.status(500).json({
       error: "An error occurred while fetching the transcription.",
     });
   }
 };
 
-
 //^ Section 3: PostgreSQL configuration
-const pool = new Pool({
-  user: 'dheerajmurthy',
-  host: 'localhost',
-  database: 'postgres',
-  port: 5432,
-});
+// const pool = new Pool({
+//   user: 'dheerajmurthy',
+//   host: 'localhost',
+//   database: 'postgres',
+//   port: 5432,
+// });
 
 const app = express();
+// app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: "http://localhost:5173", // Allow only your frontend
+    origin: "*", // Allow only your frontend
     methods: ["GET", "POST"], // Allow only GET and POST
   })
 );
@@ -238,7 +242,7 @@ async function getOrCreateFolder(folderName, parentFolderId) {
     // Check if the folder already exists
     const response = await drive.files.list({
       q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${parentFolderId}' in parents`,
-      fields: 'files(id, name)',
+      fields: "files(id, name)",
     });
 
     if (response.data.files.length > 0) {
@@ -249,37 +253,37 @@ async function getOrCreateFolder(folderName, parentFolderId) {
     // Folder doesn't exist, create it
     const fileMetadata = {
       name: folderName,
-      mimeType: 'application/vnd.google-apps.folder',
+      mimeType: "application/vnd.google-apps.folder",
       parents: [parentFolderId],
     };
 
     const folder = await drive.files.create({
       resource: fileMetadata,
-      fields: 'id',
+      fields: "id",
     });
 
     console.log(`Created folder ${folderName} with ID: ${folder.data.id}`);
     return folder.data.id;
   } catch (error) {
-    console.error('Error creating or retrieving folder:', error.message);
-    throw new Error('Failed to get or create folder');
+    console.error("Error creating or retrieving folder:", error.message);
+    throw new Error("Failed to get or create folder");
   }
 }
 
 // Helper: Get next serial number for a user and question
-async function getNextSerialNumber() {
-  const query = `
-      SELECT COUNT(*) + 1 AS serial_no
-      FROM responses;
-  `;
-  try {
-    const result = await pool.query(query);
-    return result.rows[0].serial_no;
-  } catch (error) {
-    console.error('Error retrieving serial number:', error.message);
-    throw new Error('Failed to retrieve serial number');
-  }
-}
+// async function getNextSerialNumber() {
+//   const query = `
+//       SELECT COUNT(*) + 1 AS serial_no
+//       FROM responses;
+//   `;
+//   try {
+//     const result = await pool.query(query);
+//     return result.rows[0].serial_no;
+//   } catch (error) {
+//     console.error('Error retrieving serial number:', error.message);
+//     throw new Error('Failed to retrieve serial number');
+//   }
+// }
 
 // Upload JSON file to Google Drive
 async function uploadJsonFile(localFilePath, fileName, folderId) {
@@ -303,12 +307,13 @@ async function uploadJsonFile(localFilePath, fileName, folderId) {
     });
 
     console.log("File uploaded successfully! File ID:", response.data.id);
+    return response.data.id;
   } catch (error) {
     console.error("Error uploading file:", error.message);
   }
 }
 
-
+//^ lt api
 const language = "en"; // Language code for English
 
 async function checkSyntaxAndGrammar(text) {
@@ -327,8 +332,8 @@ async function checkSyntaxAndGrammar(text) {
     );
 
     // Filter matches to exclude spelling-related issues
-    const matches = response.data.matches.filter((match) =>
-      match.rule.category.id !== "TYPOS" // Exclude typos/spelling issues
+    const matches = response.data.matches.filter(
+      (match) => match.rule.category.id !== "TYPOS" // Exclude typos/spelling issues
     );
 
     console.log("Grammar/Syntax Issues Found:", matches.length);
@@ -336,7 +341,9 @@ async function checkSyntaxAndGrammar(text) {
     matches.forEach((match, index) => {
       console.log(`Issue ${index + 1}:`);
       console.log(`- Message: ${match.message}`);
-      console.log(`- Suggestion: ${match.replacements.map((r) => r.value).join(", ")}`);
+      console.log(
+        `- Suggestion: ${match.replacements.map((r) => r.value).join(", ")}`
+      );
       console.log(`- Context: ${match.context.text}`);
     });
 
@@ -345,7 +352,6 @@ async function checkSyntaxAndGrammar(text) {
     console.error("Error checking grammar/syntax:", error);
   }
 }
-
 
 // API Route to handle video uploads and transcriptions
 app.post("/upload", upload.single("video"), async (req, res) => {
@@ -377,7 +383,8 @@ app.post("/upload", upload.single("video"), async (req, res) => {
     userFolderId = await getOrCreateFolder(userId.toString(), folderId);
 
     // Determine the next serial number
-    const serialNo = await getNextSerialNumber(userId, question);
+    // const serialNo = await getNextSerialNumber(userId, question);
+    const serialNo = req.serialNo + 1;
 
     // Create the file name
     const fileName = `${userId}_${questionCode}_${serialNo}.mp4`;
@@ -387,13 +394,19 @@ app.post("/upload", upload.single("video"), async (req, res) => {
     await transcodeToMp4(filePath, mp4FilePath);
 
     // Upload MP4 file to user-specific Google Drive folder
-    const driveFileId = await uploadFileToGoogleDrive(mp4FilePath, fileName, userFolderId);
+    const driveFileId = await uploadFileToGoogleDrive(
+      mp4FilePath,
+      fileName,
+      userFolderId
+    );
 
     // Save the response to the database
-    await saveResponseToDatabase(userId, question, driveFileId);
+    // await saveResponseToDatabase(userId, question, driveFileId);
 
     // Transcription handling
-    const transcriptionResponse = await transcribeFromURL("https://drive.google.com/uc?id=" + driveFileId + "&export=download");
+    const transcriptionResponse = await transcribeFromURL(
+      "https://drive.google.com/uc?id=" + driveFileId + "&export=download"
+    );
     console.log(transcriptionResponse);
 
     // Wait for transcription to complete
@@ -410,21 +423,28 @@ app.post("/upload", upload.single("video"), async (req, res) => {
         throw new Error(result.error);
       }
       console.log("Waiting for transcription...");
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
+      await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 seconds before retrying
     }
 
     // Save transcription result as JSON file
     const jsonFilePath = mp4FilePath.replace(".mp4", ".json");
-    fs.writeFileSync(jsonFilePath, JSON.stringify(transcriptionResult, null, 2));
+    fs.writeFileSync(
+      jsonFilePath,
+      JSON.stringify(transcriptionResult, null, 2)
+    );
     const JSONFileName = `${userId}_${questionCode}_${serialNo}.json`;
     console.log("Here?");
-    await uploadJsonFile(jsonFilePath, JSONFileName, userFolderId); // todo : please put in the drive-link and name
+    const jsonDriveFileId = await uploadJsonFile(
+      jsonFilePath,
+      JSONFileName,
+      userFolderId
+    ); // todo : please put in the drive-link and name
     console.log("No, here");
 
     res.status(200).send({
       message: "Video uploaded and transcribed successfully!",
       fileId: driveFileId,
-      transcriptionFile: jsonFilePath,
+      transcriptionFileId: jsonDrivIdePath,
       question,
       userId,
     });
@@ -442,11 +462,26 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       if (err) console.error("Error deleting JSON file:", err);
     });
     console.log("2");
-
   } catch (error) {
     console.error("Error uploading video or processing transcription:", error);
     res.status(500).send("Failed to upload video or process transcription.");
   }
+});
+
+app.post("/report", async (req, res) => {
+  console.log(req.body);
+  const driveJsonFileId = req.body.driveJsonFileId;
+  console.log("aloo paratha " + driveJsonFileId);
+  //   const jsonMetaData = await drive.files.get({
+  //     fileId: driveJsonFileId,
+  //     fields: "*",
+  //   });
+  const json = drive.files.get(
+    { fileId: driveJsonFileId, alt: "media" },
+    { responseType: "stream" }
+  );
+
+  generateTranscriptionReport(json);
 });
 
 // Start the server
