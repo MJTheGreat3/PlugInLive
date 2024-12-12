@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require("fs");
 const fillerWords = [
   "um",
   "uh",
@@ -21,18 +21,18 @@ const fillerWords = [
  * @param {Array} fillerWords - An array of filler words to check against.
  * @param {string} filePath - The file path where the report will be saved.
  */
-function generateTranscriptionReport(response, filePath = 'report.txt') {
+function generateTranscriptionReport(response, filePath = "report.txt") {
   let report = `
 Transcription Report
 =====================
-ID: ${response.data.id}
-Status: ${response.data.status}
-Audio URL: ${response.data.audio_url}
-Overall Confidence: ${(response.data.confidence * 100).toFixed(2)}%
+ID: ${response.id}
+Status: ${response.status}
+Audio URL: ${response.audio_url}
+Overall Confidence: ${(response.confidence * 100).toFixed(2)}%
 
 Transcript:
 -----------
-${response.data.text}
+${response.text}
 
 Word-by-Word Details:
 ---------------------
@@ -43,7 +43,9 @@ Word-by-Word Details:
   let totalWords = 0;
   const wordsEncountered = [];
 
-  response.data.words.forEach((word) => {
+  console.log(response);
+
+  response.words.forEach((word) => {
     totalWords++;
     if (fillerWords.includes(word.text.toLowerCase())) {
       fillerCount++;
@@ -55,11 +57,13 @@ Word-by-Word Details:
     }
   });
 
-  report += `Filler Words: ${fillerCount}\nUnique Vocabulary: ${vocabulary}\nTotal Words: ${totalWords}\n\nDifferent Words:\n${wordsEncountered.join(', ')}`;
+  report += `Filler Words: ${fillerCount}\nUnique Vocabulary: ${vocabulary}\nTotal Words: ${totalWords}\n\nDifferent Words:\n${wordsEncountered.join(
+    ", "
+  )}`;
 
   fs.writeFile(filePath, report, (err) => {
     if (err) {
-      console.error('Error writing file:', err);
+      console.error("Error writing file:", err);
     } else {
       console.log(`Report saved to "${filePath}"`);
     }
