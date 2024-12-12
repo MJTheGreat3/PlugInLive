@@ -1,0 +1,22 @@
+
+Transcription Report
+=====================
+ID: f59d10c3-284f-4460-b2bb-e11c9ee6d996
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1pDRvtGG2EGU78njUjTN-hDuofb3wKZdt&export=download
+Overall Confidence: 90.75%
+
+Transcript:
+-----------
+Hello? This is a recording.
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 5
+Total Words: 5
+
+Different Words:
+hello?, this, is, a, recording.
+
+No Grammar/Syntax Issues Found.

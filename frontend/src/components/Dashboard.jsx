@@ -39,7 +39,7 @@ function Dashboard() {
     });
     if (recordings[index]) {
       const formData = new FormData();
-      formData.append("userId", userId); 
+      formData.append("userId", userId);
       formData.append("question", questions[index]);
       formData.append("video", recordings[index]); // video file
       formData.append("serialNo", supabase.from("videos").select("*", { count: 'exact', head: true }));
@@ -49,8 +49,8 @@ function Dashboard() {
       const response = await axios.post("http://localhost:3000/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      const {data, error} = await supabase.from("videos").insert([response.data]).single();
-      if(error){
+      const { data, error } = await supabase.from("videos").insert([response.data]).single();
+      if (error) {
         console.log("Error adding video: ", error);
       }
       console.log("Response for question", index + 1, ":", response.data);
@@ -66,27 +66,31 @@ function Dashboard() {
       return;
     }
 
-    const {data, error} = await supabase.from("videos").select("*").eq("user_id", userId);
-    if(error){
+    const { data, error } = await supabase.from("videos").select("*").eq("user_id", userId);
+    if (error) {
       console.log("Error adding video: ", error);
+      return;
     }
+
     try {
-      for (let i = 0; i < data.length; i++) {
+      const requests = data.map((item) => {
         const formData = new FormData();
-        console.log(data[i].transcript_id);
-        formData.append("transcription_id", data[i].transcript_id);
-        const response = await axios.post("http://localhost:3000/report", formData, {
+        console.log(item.transcript_id);
+        formData.append("transcription_id", item.transcript_id);
+        return axios.post("http://localhost:3000/report", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      }
+      });
+
+      // Wait for all requests to complete
+      await Promise.all(requests);
       alert("Responses saved successfully!");
     } catch (error) {
       console.error("Error submitting responses:", error);
       alert("Failed to save responses. Please try again.");
     }
   };
-
-  if(!session){
+  if (!session) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#242424] text-center px-4">
         <h1 className="text-4xl font-bold text-white mb-4">

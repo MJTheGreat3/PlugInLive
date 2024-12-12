@@ -12,28 +12,6 @@ const generateTranscriptionReport = require("./report.js");
 
 require("dotenv").config();
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
-/* 
-* @usage
-    const fileUploadResponse = await uploadFileToAssemblyAI(filePath);
-*/
-// Upload file to AssemblyAI
-// async function uploadFileToAssemblyAI(filePath) {
-//   const file = fs.readFileSync(filePath);
-
-//   const response = await axios.post(
-//     'https://api.assemblyai.com/v2/upload',
-//     file,
-//     {
-//       headers: {
-//         authorization: ASSEMBLYAI_API_KEY,
-//         'content-type': 'application/octet-stream',
-//       },
-//     }
-//   );
-
-//   return response.data;
-// }
-
 async function transcribeFromURL(fileurl) {
   const apikey = ASSEMBLYAI_API_KEY; // replace with your api key
 
@@ -60,30 +38,6 @@ async function transcribeFromURL(fileurl) {
     );
   }
 }
-
-/*
-* @usage
-    const transcriptionResponse = await requestTranscription(fileUploadResponse.upload_url);
-
-*/
-// Helper: Request transcription
-// async function requestTranscription(uploadUrl) {
-//   const response = await axios.post(
-//     'https://api.assemblyai.com/v2/transcript',
-//     {
-//       audio_url: uploadUrl,
-//     },
-//     {
-//       headers: {
-//         authorization: ASSEMBLYAI_API_KEY,
-//         'content-type': 'application/json',
-//       },
-//     }
-//   );
-
-//   return response.data;
-// }
-
 // Get transcription status and result
 // async function getTranscription({ transcriptionId }) {
 const getTranscription = async (req, res) => {
@@ -119,13 +73,6 @@ const getTranscription = async (req, res) => {
 };
 
 //^ Section 3: PostgreSQL configuration
-// const pool = new Pool({
-//   user: 'dheerajmurthy',
-//   host: 'localhost',
-//   database: 'postgres',
-//   port: 5432,
-// });
-
 const app = express();
 // app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -217,25 +164,6 @@ async function uploadFileToGoogleDrive(filePath, fileName, folderId) {
     throw new Error("Failed to upload to Google Drive");
   }
 }
-
-// Function to insert video response into the database
-// async function saveResponseToDatabase(userId, question, driveFileId) {
-//   const query = `
-//         INSERT INTO responses (user_id, question, drive_file_id, created_at)
-//         VALUES ($1, $2, $3, NOW())
-//         RETURNING id;
-//     `;
-//   const values = [userId, question, driveFileId];
-
-//   try {
-//     const result = await pool.query(query, values);
-//     console.log("Response saved to database with ID:", result.rows[0].id);
-//   } catch (error) {
-//     console.error("Error saving response to database:", error.message);
-//     throw new Error("Failed to save response to database");
-//   }
-// }
-
 // Helper: Check if a folder exists in Google Drive
 async function getOrCreateFolder(folderName, parentFolderId) {
   try {
@@ -269,22 +197,6 @@ async function getOrCreateFolder(folderName, parentFolderId) {
     throw new Error("Failed to get or create folder");
   }
 }
-
-// Helper: Get next serial number for a user and question
-// async function getNextSerialNumber() {
-//   const query = `
-//       SELECT COUNT(*) + 1 AS serial_no
-//       FROM responses;
-//   `;
-//   try {
-//     const result = await pool.query(query);
-//     return result.rows[0].serial_no;
-//   } catch (error) {
-//     console.error('Error retrieving serial number:', error.message);
-//     throw new Error('Failed to retrieve serial number');
-//   }
-// }
-
 // Upload JSON file to Google Drive
 async function uploadJsonFile(localFilePath, fileName, folderId) {
   console.log(folderId);
@@ -458,30 +370,13 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       if (err) console.error("Error deleting JSON file:", err);
     });
     console.log("2");
-    return {file_id: driveFileId, transcript_id: jsonDriveFileId, question: question, user_id: userId};
+    return { file_id: driveFileId, transcript_id: jsonDriveFileId, question: question, user_id: userId };
   } catch (error) {
     console.error("Error uploading video or processing transcription:", error);
     res.status(500).send("Failed to upload video or process transcription.");
   }
-  
+
 });
-
-// app.post("/report", async (req, res) => {
-//   console.log(req.body);
-//   const driveJsonFileId = req.body.driveJsonFileId;
-//   console.log("aloo paratha " + driveJsonFileId);
-//   //   const jsonMetaData = await drive.files.get({
-//   //     fileId: driveJsonFileId,
-//   //     fields: "*",
-//   //   });
-//   const json = drive.files.get(
-//     { fileId: driveJsonFileId, alt: "media" },
-//     { responseType: "stream" }
-//   );
-
-//   generateTranscriptionReport(json);
-// });
-
 // Middleware to parse JSON and form-data requests
 // app.use(express.urlencoded({ extended: true })); For parsing application/x-www-form-urlencoded
 // app.use(express.json()); For parsing application/json
@@ -504,11 +399,6 @@ app.post("/report", upload.none(), async (req, res) => {
       { fileId: driveJsonFileId, alt: "media" },
       { responseType: "stream" }
     );
-
-    // console.log(jsonMetaData);
-    // console.log("Json yaha se");
-    // console.log(json);
-
     const getData = async () => {
       return new Promise((resolve, reject) => {
         let data = "";
@@ -535,16 +425,17 @@ app.post("/report", upload.none(), async (req, res) => {
     const processData = async () => {
       try {
         const data = await getData(); // Await the Promise to get the data
-        generateTranscriptionReport(data); // Pass the data to your function
+        await generateTranscriptionReport(data, "uploads/" + transcription_id + ".txt"); // Pass the data to your function
       } catch (error) {
         console.error("Error:", error);
       }
     };
 
-    processData();
-
+    await processData();
+    // return res.status(200);
+    console.log("hello is this cumming");
+    res.status(200).json({ success: true, message: "Report generated successfully!" });
     return {};
-
   } catch (error) {
     console.error("Error in /report route:", error);
     return res
