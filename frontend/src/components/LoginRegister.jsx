@@ -41,6 +41,7 @@ function LoginRegister() {
               },
             },
           }}
+          providers={[]}
         />
       </div>
     </div>
