@@ -3,7 +3,6 @@ import Dashboard from "./components/Dashboard"
 import supabase from "./components/SupabaseClient";
 import LoginRegister from "./components/LoginRegister";
 import { SessionProvider } from "./components/SessionContext";
-// import { session1, setSession1 } from "./components/Auth";
 
 function App() {
   const handleLogout = async () => {

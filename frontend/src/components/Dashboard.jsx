@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
 import VideoPreview from "./VideoPreview.jsx";
+import { useSession } from "./SessionContext.jsx";
 
 const questions = [
   "Tell us about yourself?",
@@ -15,6 +16,7 @@ function Dashboard() {
   const [dimensions, setDimensions] = useState(
     Array(questions.length).fill({ width: 500, height: 500 })
   );
+  const { session } = useSession();
 
   const handleSaveRecording = (index, url, dims) => {
     const blob = fetch(url).then((res) => res.blob());
@@ -67,7 +69,7 @@ function Dashboard() {
 
 
 
-  return (
+  return session && (
     <div className="p-5 m-auto max-w-3xl">
       <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
       {questions.map((question, index) => (
