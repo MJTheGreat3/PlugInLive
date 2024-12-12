@@ -111,7 +111,7 @@ function Dashboard() {
                 <div className="flex justify-center">
                   <VideoPreview stream={previewStream} />
                 </div>
-                <div className="flex justify-start space-x-4">
+                <div className="flex flex-row justify-between">
                   <button
                     onClick={startRecording}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
