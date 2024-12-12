@@ -469,33 +469,90 @@ app.post("/upload", upload.single("video"), async (req, res) => {
   }
 });
 
+// app.post("/report", async (req, res) => {
+//   console.log(req.body);
+//   const driveJsonFileId = req.body.driveJsonFileId;
+//   console.log("aloo paratha " + driveJsonFileId);
+//   //   const jsonMetaData = await drive.files.get({
+//   //     fileId: driveJsonFileId,
+//   //     fields: "*",
+//   //   });
+//   const json = drive.files.get(
+//     { fileId: driveJsonFileId, alt: "media" },
+//     { responseType: "stream" }
+//   );
+
+//   generateTranscriptionReport(json);
+// });
+
 // Middleware to parse JSON and form-data requests
-app.use(express.urlencoded({ extended: true }));  // For parsing application/x-www-form-urlencoded
-app.use(express.json());  // For parsing application/json
+app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use(express.json()); // For parsing application/json
 
 app.post("/report", async (req, res) => {
-  console.log("Received body:", req.body);  // Log the body to check
+  console.log("Received body:", req.body); // Log the body to check
   try {
     const { id } = req.body;
     transcriptionId = id;
     if (!transcriptionId) {
       return res.status(400).json({ error: "Missing transcriptionId" });
     }
-    console.log(req.body);
 
-    // Process the transcription
-    const transcriptionResult = await getTranscription({ id: transcriptionId });
+    const driveJsonFileId = id;
+    const jsonMetaData = await drive.files.get({
+      fileId: driveJsonFileId,
+      fields: "*",
+    });
+    const json = await drive.files.get(
+      { fileId: driveJsonFileId, alt: "media" },
+      { responseType: "stream" }
+    );
 
-    if (!transcriptionResult) {
-      return res.status(404).json({ error: "Transcription not found" });
-    }
+    // console.log(jsonMetaData);
+    // console.log("Json yaha se");
+    // console.log(json);
 
-    // Generate the report
-    const report = await generateTranscriptionReport(transcriptionResult);
-    return res.json(report);
+    const getData = async () => {
+      return new Promise((resolve, reject) => {
+        let data = "";
+
+        json.data.on("data", (chunk) => {
+          data += chunk;
+        });
+
+        json.data.on("end", () => {
+          try {
+            const jsonData = JSON.parse(data); // Assuming you expect the data to be JSON
+            resolve(jsonData); // Resolve the promise with the parsed data
+          } catch (error) {
+            reject(error); // Reject the promise if JSON parsing fails
+          }
+        });
+
+        json.data.on("error", (err) => {
+          reject(err); // Reject if an error occurs while reading the stream
+        });
+      });
+    };
+
+    const processData = async () => {
+      try {
+        const data = await getData(); // Await the Promise to get the data
+        generateTranscriptionReport(data); // Pass the data to your function
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    processData();
+
+    return {};
+
   } catch (error) {
     console.error("Error in /report route:", error);
-    return res.status(500).json({ error: "An error occurred while processing the report" });
+    return res
+      .status(500)
+      .json({ error: "An error occurred while processing the report" });
   }
 });
 
