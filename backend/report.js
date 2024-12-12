@@ -1,7 +1,6 @@
 const fs = require("fs");
 const axios = require("axios");
 
-
 //^ lt api
 const language = "en"; // Language code for English
 
@@ -26,6 +25,7 @@ async function checkSyntaxAndGrammar(text) {
     );
 
     console.log("Grammar/Syntax Issues Found:", matches.length);
+    let ans = '';
 
     matches.forEach((match, index) => {
       console.log(`Issue ${index + 1}:`);
@@ -34,11 +34,17 @@ async function checkSyntaxAndGrammar(text) {
         `- Suggestion: ${match.replacements.map((r) => r.value).join(", ")}`
       );
       console.log(`- Context: ${match.context.text}`);
+      ans += `Issue ${index + 1}:\n`;
+      ans += `- Message: ${match.message}\n`;
+      ans += `- Suggestion: ${match.replacements.map((r) => r.value).join(", ")}\n`;
+      ans += `- Context: ${match.context.text}\n`;
+
     });
 
-    return matches.length; // Return the count of grammar/syntax issues
+    return { count: matches.length, issues: ans }; // Return count and issues for the report
   } catch (error) {
     console.error("Error checking grammar/syntax:", error);
+    return { count: 0, issues: "" }; // Return 0 issues if there's an error
   }
 }
 
@@ -56,6 +62,7 @@ const fillerWords = [
   "ok",
   "hmm",
 ];
+
 /**
  * Generate and save a transcription report, including LT API results.
  *
@@ -104,18 +111,11 @@ Word-by-Word Details:
   )}\n`;
 
   // Call the LT API to check grammar and syntax
-  const grammarIssues = await checkSyntaxAndGrammar(response.text);
+  const { count, issues } = await checkSyntaxAndGrammar(response.text);
 
-  if (grammarIssues.length > 0) {
-    report += `\nGrammar/Syntax Issues Found: ${grammarIssues.length}\n\n`;
-    grammarIssues.forEach((issue, index) => {
-      report += `
-Issue ${index + 1}:
-- Message: ${issue.message}
-- Suggestion: ${issue.replacements.map((r) => r.value).join(", ")}
-- Context: ${issue.context.text}
-`;
-    });
+  if (count > 0) {
+    report += `\nGrammar/Syntax Issues Found: ${count}\n\n`;
+    report += issues; // Append grammar issues directly
   } else {
     report += `\nNo Grammar/Syntax Issues Found.\n`;
   }
@@ -129,4 +129,5 @@ Issue ${index + 1}:
   }
   return {};
 }
+
 module.exports = generateTranscriptionReport;
