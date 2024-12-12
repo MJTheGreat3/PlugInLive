@@ -442,13 +442,8 @@ app.post("/upload", upload.single("video"), async (req, res) => {
     console.log("No, here");
 
     res.status(200).send({
-      message: "Video uploaded and transcribed successfully!",
-      fileId: driveFileId,
-      transcriptionFileId: jsonDrivIdePath,
-      question,
-      userId,
+      file_id: driveFileId, transcript_id: jsonDriveFileId, question: question, user_id: userId
     });
-
 
     console.log("1");
 
@@ -463,10 +458,12 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       if (err) console.error("Error deleting JSON file:", err);
     });
     console.log("2");
+    return {file_id: driveFileId, transcript_id: jsonDriveFileId, question: question, user_id: userId};
   } catch (error) {
     console.error("Error uploading video or processing transcription:", error);
     res.status(500).send("Failed to upload video or process transcription.");
   }
+  
 });
 
 // app.post("/report", async (req, res) => {
@@ -486,19 +483,19 @@ app.post("/upload", upload.single("video"), async (req, res) => {
 // });
 
 // Middleware to parse JSON and form-data requests
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-app.use(express.json()); // For parsing application/json
+// app.use(express.urlencoded({ extended: true })); For parsing application/x-www-form-urlencoded
+// app.use(express.json()); For parsing application/json
 
-app.post("/report", async (req, res) => {
+app.post("/report", upload.none(), async (req, res) => {
   console.log("Received body:", req.body); // Log the body to check
   try {
-    const { id } = req.body;
-    transcriptionId = id;
+    const { transcription_id } = req.body;
+    transcriptionId = transcription_id;
     if (!transcriptionId) {
       return res.status(400).json({ error: "Missing transcriptionId" });
     }
 
-    const driveJsonFileId = id;
+    const driveJsonFileId = transcription_id;
     const jsonMetaData = await drive.files.get({
       fileId: driveJsonFileId,
       fields: "*",

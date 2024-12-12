@@ -1,20 +1,20 @@
 
 Transcription Report
 =====================
-ID: f01597cc-ed13-4a28-9b34-c534cf1f80cc
+ID: de18ae3e-c37a-4e10-91c1-a37464cdab61
 Status: completed
-Audio URL: https://drive.google.com/uc?id=1vwKDc1c2yj3w5MqVhAMOdqMork6Kzq84&export=download
-Overall Confidence: 97.80%
+Audio URL: https://drive.google.com/uc?id=1sA9GfyL6Rtdy6aP9NxnvTpOc4B9pGty3&export=download
+Overall Confidence: 90.83%
 
 Transcript:
 -----------
-He?
+Let's give it another shot.
 
 Word-by-Word Details:
 ---------------------
 Filler Words: 0
-Unique Vocabulary: 1
-Total Words: 1
+Unique Vocabulary: 5
+Total Words: 5
 
 Different Words:
-he?
+let's, give, it, another, shot.

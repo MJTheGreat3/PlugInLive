@@ -19,8 +19,10 @@ function Dashboard() {
     Array(questions.length).fill({ width: 500, height: 500 })
   );
   const { session } = useSession();
+  let userId = session?.user?.id;
 
-  const handleSaveRecording = (index, url, dims) => {
+  const handleSaveRecording = async (index, url, dims) => {
+    // console.log(session.user.id);
     const blob = fetch(url).then((res) => res.blob());
     blob.then((data) => {
       const file = new File([data], `response_${index + 1}.webm`, { type: "video/webm" });
@@ -35,6 +37,24 @@ function Dashboard() {
         return updated;
       });
     });
+    if (recordings[index]) {
+      const formData = new FormData();
+      formData.append("userId", userId); 
+      formData.append("question", questions[index]);
+      formData.append("video", recordings[index]); // video file
+      formData.append("serialNo", supabase.from("videos").select("*", { count: 'exact', head: true }));
+
+      // Send individual request for each video
+      console.log("hell0");
+      const response = await axios.post("http://localhost:3000/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const {data, error} = await supabase.from("videos").insert([response.data]).single();
+      if(error){
+        console.log("Error adding video: ", error);
+      }
+      console.log("Response for question", index + 1, ":", response.data);
+    }
   };
 
   const handleSubmit = async () => {
@@ -46,21 +66,18 @@ function Dashboard() {
       return;
     }
 
+    const {data, error} = await supabase.from("videos").select("*").eq("user_id", userId);
+    if(error){
+      console.log("Error adding video: ", error);
+    }
     try {
-      for (let i = 0; i < recordings.length; i++) {
-        if (recordings[i]) {
-          const formData = new FormData();
-          formData.append("userId", "1"); // Default user ID
-          formData.append("question", questions[i]);
-          formData.append("video", recordings[i]); // video file
-
-          // Send individual request for each video
-          const response = await axios.post("http://localhost:3000/upload", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
-
-          console.log("Response for question", i + 1, ":", response.data);
-        }
+      for (let i = 0; i < data.length; i++) {
+        const formData = new FormData();
+        console.log(data[i].transcript_id);
+        formData.append("transcription_id", data[i].transcript_id);
+        const response = await axios.post("http://localhost:3000/report", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
       alert("Responses saved successfully!");
     } catch (error) {
