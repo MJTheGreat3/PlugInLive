@@ -449,6 +449,7 @@ app.post("/upload", upload.single("video"), async (req, res) => {
       userId,
     });
 
+
     console.log("1");
 
     // Delete the original video file
@@ -468,20 +469,34 @@ app.post("/upload", upload.single("video"), async (req, res) => {
   }
 });
 
-app.post("/report", async (req, res) => {
-  console.log(req.body);
-  const driveJsonFileId = req.body.driveJsonFileId;
-  console.log("aloo paratha " + driveJsonFileId);
-  //   const jsonMetaData = await drive.files.get({
-  //     fileId: driveJsonFileId,
-  //     fields: "*",
-  //   });
-  const json = drive.files.get(
-    { fileId: driveJsonFileId, alt: "media" },
-    { responseType: "stream" }
-  );
+// Middleware to parse JSON and form-data requests
+app.use(express.urlencoded({ extended: true }));  // For parsing application/x-www-form-urlencoded
+app.use(express.json());  // For parsing application/json
 
-  generateTranscriptionReport(json);
+app.post("/report", async (req, res) => {
+  console.log("Received body:", req.body);  // Log the body to check
+  try {
+    const { id } = req.body;
+    transcriptionId = id;
+    if (!transcriptionId) {
+      return res.status(400).json({ error: "Missing transcriptionId" });
+    }
+    console.log(req.body);
+
+    // Process the transcription
+    const transcriptionResult = await getTranscription({ id: transcriptionId });
+
+    if (!transcriptionResult) {
+      return res.status(404).json({ error: "Transcription not found" });
+    }
+
+    // Generate the report
+    const report = await generateTranscriptionReport(transcriptionResult);
+    return res.json(report);
+  } catch (error) {
+    console.error("Error in /report route:", error);
+    return res.status(500).json({ error: "An error occurred while processing the report" });
+  }
 });
 
 // Start the server
