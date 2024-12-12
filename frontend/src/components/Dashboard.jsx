@@ -5,6 +5,7 @@ import axios from "axios";
 import VideoPreview from "./VideoPreview.jsx";
 import { useSession } from "./SessionContext.jsx";
 import supabase from "./SupabaseClient.jsx";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const questions = [
   "Tell us about yourself?",
@@ -57,8 +58,11 @@ function Dashboard() {
     }
   };
 
-  const handleSubmit = async () => {
-    // Check if all questions have responses
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault(); // Prevent form submission from reloading the page
+
     const allAnswered = recordings.every((recording) => recording !== null);
 
     if (!allAnswered) {
@@ -66,30 +70,37 @@ function Dashboard() {
       return;
     }
 
-    const { data, error } = await supabase.from("videos").select("*").eq("user_id", userId);
-    if (error) {
-      console.log("Error adding video: ", error);
-      return;
-    }
-
     try {
+      const { data, error } = await supabase.from("videos").select("*").eq("user_id", userId);
+      if (error) throw new Error("Error fetching video data from Supabase");
+
       const requests = data.map((item) => {
         const formData = new FormData();
-        console.log(item.transcript_id);
         formData.append("transcription_id", item.transcript_id);
+        formData.append("question", item.question);
         return axios.post("http://localhost:3000/report", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       });
 
-      // Wait for all requests to complete
-      await Promise.all(requests);
-      alert("Responses saved successfully!");
+      // Wait for all requests to complete and get the responses
+      const responses = await Promise.all(requests);
+
+      // Collect the text from all responses
+      const reports = responses.map((response) => response.data);
+      console.log(reports);
+
+      // Navigate to the reports page with collected reports
+      navigate("/reports", { state: { reports } });
+
+
+      console.log("Responses saved successfully!");
     } catch (error) {
       console.error("Error submitting responses:", error);
       alert("Failed to save responses. Please try again.");
     }
   };
+
   if (!session) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-[#242424] text-center px-4">
@@ -172,6 +183,7 @@ function Dashboard() {
       ))}
       <button
         onClick={handleSubmit}
+        type="button"
         className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 mt-6"
       >
         Submit

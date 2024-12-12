@@ -6,6 +6,8 @@ Status: completed
 Audio URL: https://drive.google.com/uc?id=1ZT77sqG897Lff82F4EyYwPpp7NdEQ4k9&export=download
 Overall Confidence: 89.57%
 
+Question: How do you stay updated with industry trends?
+
 Transcript:
 -----------
 Please find grammar issues with this.

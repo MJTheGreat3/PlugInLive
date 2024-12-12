@@ -6,6 +6,8 @@ Status: completed
 Audio URL: https://drive.google.com/uc?id=1pDRvtGG2EGU78njUjTN-hDuofb3wKZdt&export=download
 Overall Confidence: 90.75%
 
+Question: What’s your view on remote work culture?
+
 Transcript:
 -----------
 Hello? This is a recording.

@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: 47921ad4-f152-487a-966e-31af6301651b
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1kwTnkzl7agV3tg-xQ7jyeth6bldugvqg&export=download
+Overall Confidence: 90.00%
+
+Question: What inspired you to choose your career path?
+
+Transcript:
+-----------
+What inspired you to choose your career path?
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 8
+Total Words: 8
+
+Different Words:
+what, inspired, you, to, choose, your, career, path?
+
+No Grammar/Syntax Issues Found.

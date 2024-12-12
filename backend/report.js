@@ -63,7 +63,7 @@ const fillerWords = [
  * @param {Array} fillerWords - An array of filler words to check against.
  * @param {string} filePath - The file path where the report will be saved.
  */
-async function generateTranscriptionReport(response, filePath = "report.txt") {
+async function generateTranscriptionReport(response, filePath = "report.txt", question) {
   let report = `
 Transcription Report
 =====================
@@ -71,6 +71,8 @@ ID: ${response.id}
 Status: ${response.status}
 Audio URL: ${response.audio_url}
 Overall Confidence: ${(response.confidence * 100).toFixed(2)}%
+
+Question: ${question}
 
 Transcript:
 -----------

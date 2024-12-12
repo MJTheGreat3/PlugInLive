@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: 773bac5a-1a69-487c-a4cd-77ecd50bfcff
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1ZFCzYyRc1WRRk25VnpB5jvuzCcSxFnHN&export=download
+Overall Confidence: 80.00%
+
+Question: What’s your view on remote work culture?
+
+Transcript:
+-----------
+Mic testing, 1, 2, 3, 4.
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 6
+Total Words: 6
+
+Different Words:
+mic, testing,, 1,, 2,, 3,, 4.
+
+No Grammar/Syntax Issues Found.

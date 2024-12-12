@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: 42cbf0d6-a0c6-4902-9fb4-eb641bf13969
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1N8lSS3xieMHLIKl2t6rnT7NpoVJgSO_K&export=download
+Overall Confidence: 99.57%
+
+Question: How do you stay updated with industry trends?
+
+Transcript:
+-----------
+What a wonderful world.
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 4
+Total Words: 4
+
+Different Words:
+what, a, wonderful, world.
+
+No Grammar/Syntax Issues Found.

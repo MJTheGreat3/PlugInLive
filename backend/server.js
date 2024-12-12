@@ -384,7 +384,7 @@ app.post("/upload", upload.single("video"), async (req, res) => {
 app.post("/report", upload.none(), async (req, res) => {
   console.log("Received body:", req.body); // Log the body to check
   try {
-    const { transcription_id } = req.body;
+    const { transcription_id, question } = req.body;
     transcriptionId = transcription_id;
     if (!transcriptionId) {
       return res.status(400).json({ error: "Missing transcriptionId" });
@@ -421,21 +421,34 @@ app.post("/report", upload.none(), async (req, res) => {
         });
       });
     };
+    const completeTextFilePath = "uploads/" + transcription_id + ".txt";
 
     const processData = async () => {
       try {
         const data = await getData(); // Await the Promise to get the data
-        await generateTranscriptionReport(data, "uploads/" + transcription_id + ".txt"); // Pass the data to your function
+        await generateTranscriptionReport(data, completeTextFilePath, question); // Pass the data to your function
       } catch (error) {
         console.error("Error:", error);
       }
     };
 
     await processData();
-    // return res.status(200);
+    // sending data to frontend
+
+    const filePath = path.join(__dirname, completeTextFilePath);
+    const fileName = transcription_id + ".txt";
+
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    const readStream = fs.createReadStream(filePath);
+    readStream.pipe(res);
+
+    readStream.on('error', (err) => {
+      console.error('File read error:', err);
+      res.status(500).send('An error occurred while streaming the file.');
+    });
     console.log("hello is this cumming");
-    res.status(200).json({ success: true, message: "Report generated successfully!" });
-    return {};
   } catch (error) {
     console.error("Error in /report route:", error);
     return res

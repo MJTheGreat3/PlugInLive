@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: cb2fcd6b-3775-406a-873a-7d1472fd1699
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1GL4SFUmlzpgCMPumtD_2kF1IxBOBsImo&export=download
+Overall Confidence: 97.73%
+
+Question: How do you stay updated with industry trends?
+
+Transcript:
+-----------
+How do you stay updated with the industry trends?
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 9
+Total Words: 9
+
+Different Words:
+how, do, you, stay, updated, with, the, industry, trends?
+
+No Grammar/Syntax Issues Found.

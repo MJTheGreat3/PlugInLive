@@ -19,7 +19,7 @@ export const SessionProvider = ({ children }) => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       if (session) {
-        navigate('/');
+        // navigate('/');
       }
     };
 
@@ -29,7 +29,7 @@ export const SessionProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
-        navigate('/');
+        // navigate('/');
       }
     });
 

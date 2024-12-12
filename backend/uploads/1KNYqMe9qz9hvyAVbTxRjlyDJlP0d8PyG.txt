@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: f70c2425-0ac3-45a7-b476-74386acf163f
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1K6ozTBdMmYUwtI_9l1W-FDIi61PDB5fm&export=download
+Overall Confidence: 81.53%
+
+Question: Tell us about yourself?
+
+Transcript:
+-----------
+Hello. I am Dheeraj Murthy. I like potato and pizza. Please help me.
+
+Word-by-Word Details:
+---------------------
+Filler Words: 1
+Unique Vocabulary: 11
+Total Words: 13
+
+Different Words:
+hello., i, am, dheeraj, murthy., potato, and, pizza., please, help, me.
+
+No Grammar/Syntax Issues Found.

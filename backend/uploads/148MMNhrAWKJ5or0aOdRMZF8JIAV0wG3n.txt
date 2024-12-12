@@ -1,24 +1,24 @@
 
 Transcription Report
 =====================
-ID: 1f5d47c8-8a34-4f45-be20-81ae7a8f7097
+ID: 7b13dfcf-936a-469f-a516-95bda245d2bf
 Status: completed
-Audio URL: https://drive.google.com/uc?id=1e5RS5ME6wHXCN86ZWD9JrXilfBfWVaK-&export=download
-Overall Confidence: 93.82%
+Audio URL: https://drive.google.com/uc?id=1bPmdXISKrQV7POYpm_AfF4gMz1FaiQZu&export=download
+Overall Confidence: 70.16%
 
 Question: What inspired you to choose your career path?
 
 Transcript:
 -----------
-Console.org is a good thing.
+Aloo to do to do.
 
 Word-by-Word Details:
 ---------------------
 Filler Words: 0
-Unique Vocabulary: 5
+Unique Vocabulary: 4
 Total Words: 5
 
 Different Words:
-console.org, is, a, good, thing.
+aloo, to, do, do.
 
 No Grammar/Syntax Issues Found.

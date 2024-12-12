@@ -1,0 +1,24 @@
+
+Transcription Report
+=====================
+ID: 9b5177da-c869-446a-a036-f13e64665fa4
+Status: completed
+Audio URL: https://drive.google.com/uc?id=1P84lY1GMR4DQd406Q-g9E3G7QHSDHwQp&export=download
+Overall Confidence: 46.76%
+
+Question: Tell us about yourself?
+
+Transcript:
+-----------
+Hallelujah, Hallelujah.
+
+Word-by-Word Details:
+---------------------
+Filler Words: 0
+Unique Vocabulary: 2
+Total Words: 2
+
+Different Words:
+hallelujah,, hallelujah.
+
+No Grammar/Syntax Issues Found.
