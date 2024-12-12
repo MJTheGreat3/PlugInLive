@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { ReactMediaRecorder } from "react-media-recorder";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import VideoPreview from "./VideoPreview.jsx";
 import { useSession } from "./SessionContext.jsx";
+import supabase from "./SupabaseClient.jsx";
 
 const questions = [
   "Tell us about yourself?",
@@ -67,11 +69,37 @@ function Dashboard() {
     }
   };
 
+  if(!session){
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#242424] text-center px-4">
+        <h1 className="text-4xl font-bold text-white mb-4">
+          Welcome to Interview Assessor
+        </h1>
+        <p className="text-lg text-gray-300 mb-6 max-w-md">
+          Master your interview skills with ease! Record your answers, get detailed feedback, and improve your performance with AI-powered insights.
+        </p>
+        <Link
+          to="/login"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg transform transition-transform duration-200 hover:text-gray-200"
+        >
+          Login Now
+        </Link>
+      </div>
+    )
+  }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return session && (
-    <div className="p-5 m-auto max-w-3xl">
-      <h1 className="text-3xl font-bold mb-6">Video Interview</h1>
+    <div className="pt-2 m-auto max-w-3xl">
+      <h1 className="pt-8 text-center">Interview Assessor</h1>
+      <nav className="flex flex-row justify-between pt-4">
+        <Link className="bg-blue-500 hover:bg-blue-700 hover:text-gray-200 text-white font-bold py-2 px-4 rounded basis-1/4 w-32 text-center" to="/">Dashboard</Link>
+        <Link className="bg-red-500 hover:bg-red-700 hover:text-gray-200 text-white font-bold py-2 px-4 rounded basis-1/4 w-32 text-center" onClick={handleLogout}>Logout</Link>
+      </nav>
+      <h1 className="text-3xl font-bold mb-6 pt-8">Video Interview</h1>
       {questions.map((question, index) => (
         <div key={index} className="mb-6">
           <h3 className="text-2xl font-semibold mb-4">{question}</h3>

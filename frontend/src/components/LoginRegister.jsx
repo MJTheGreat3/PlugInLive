@@ -14,7 +14,14 @@ function LoginRegister() {
 
   // Render logic
   return (
-    session == null ? (<Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />) : (
+    session == null ? (<div className="flex justify-center items-center h-screen">
+      <div className="w-96">
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ theme: ThemeSupa }}
+        />
+      </div>
+    </div>) : (
       <div>
         <p>Logged in!</p>
         <button onClick={handleLogout}>Logout</button>

@@ -9,15 +9,10 @@ function App() {
     await supabase.auth.signOut();
   };
 
+
   return (
     <BrowserRouter>
       <SessionProvider>
-        <nav>
-          <h1>Interview Assessor</h1>
-          {<Link to="/">Dashboard</Link>}
-          <Link to="/login">Login</Link>
-          <button onClick={handleLogout}>Logout</button>
-        </nav>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<LoginRegister />} />
