@@ -25,3 +25,4 @@ dist-ssr
 *.env
 
 backend/client_secret.json
+backend/uploads/*
